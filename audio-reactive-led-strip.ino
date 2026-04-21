@@ -7,7 +7,6 @@
  *
  */
 
-#include "driver/i2s.h"
 #include <FastLED.h>
 #include "includes/FFT.h"
 #include "includes/VisualEffect.h"
@@ -50,18 +49,24 @@
 *
 */
 
+#include "ESP_I2S.h"
+const uint8_t I2S_SCK = 14;
+const uint8_t I2S_WS = 27;
+const uint8_t I2S_DIN = 32;
+
+
 const uint16_t BUFFER_SIZE = 1024;
 const uint8_t N_ROLLING_HISTORY = 2;
 const uint16_t SAMPLE_RATE = 44100;
-const uint16_t N_PIXELS = 60;
+const uint16_t N_PIXELS = 52;
 const uint16_t N_MEL_BIN = 18;
 const float MIN_FREQUENCY = 200;
 const float MAX_FREQUENCY = 12000;
 const float MIN_VOLUME_THRESHOLD = 0.0003;
 
-const int PDM_WS_IO_PIN = 19;
-const int PDM_DATA_IN_PIN = 22;
-const int LED_STRIP_DATA_PIN = 21;
+const int PDM_WS_IO_PIN = 27;
+const int PDM_DATA_IN_PIN = 32;
+const int LED_STRIP_DATA_PIN = 13;
 const int LED_STRIP_CLOCK_PIN = 17;
 const touch_pad_t TOUCH_PAD_PIN = TOUCH_PAD_NUM9; /*TOUCH_PAD_NUM9 is GPIO32*/
 
@@ -69,26 +74,6 @@ float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
 class FFT fft(BUFFER_SIZE*N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE, MIN_VOLUME_THRESHOLD);
 class VisualEffect effect(N_MEL_BIN, N_PIXELS);
 CRGB physic_leds[N_PIXELS];
-
-i2s_config_t i2s_config = {
-  .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_PDM),
-  .sample_rate = SAMPLE_RATE,
-  .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-  .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
-  .communication_format = I2S_COMM_FORMAT_PCM,
-
-  .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-  .dma_buf_count = 32,
-  .dma_buf_len = 32
-};
-
-i2s_pin_config_t pin_config = {
-  .bck_io_num = -1,
-  .ws_io_num = PDM_WS_IO_PIN,
-  .data_out_num = -1,
-  .data_in_num = PDM_DATA_IN_PIN
-};
-
 
 typedef enum PLAYMODE {
   MODE_OFF = 0,
@@ -101,18 +86,22 @@ typedef enum PLAYMODE {
 };
 PLAYMODE CurrentMode = MODE_SCROLL;
 
+I2SClass i2s;
+
 void setup() {
   FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(physic_leds, N_PIXELS);
   //FastLED.addLeds<APA102, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, GRB>(physic_leds, N_PIXELS);
   Serial.begin(115200);
-  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-  i2s_set_pin(I2S_NUM_0, &pin_config);
-  i2s_stop(I2S_NUM_0);
-  i2s_start(I2S_NUM_0);
+    // Set up the pins used for audio input
+  i2s.setPins(I2S_SCK, I2S_WS, -1, I2S_DIN);
 
-  touch_pad_init();
-  touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
-  touch_pad_config(TOUCH_PAD_PIN, 0);
+  // Initialize the I2S bus in standard mode
+  if (!i2s.begin(I2S_MODE_STD,
+                  SAMPLE_RATE, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO, I2S_STD_SLOT_LEFT)) {
+    Serial.println("Failed to initialize I2S bus!");
+    return;
+  }
+
 }
 
 void loop() {
@@ -124,7 +113,8 @@ void loop() {
   int16_t l[BUFFER_SIZE];
 
   unsigned int read_num;
-  i2s_read(I2S_NUM_0, l, BUFFER_SIZE * 2, &read_num, portMAX_DELAY);
+  i2s.readBytes((char*)l, BUFFER_SIZE * 2);
+  //i2s_read(I2S_NUM_0, l, BUFFER_SIZE * 2, &read_num, portMAX_DELAY);
 
   for (int i = 0; i < BUFFER_SIZE; i++) {
     y_data[BUFFER_SIZE * (N_ROLLING_HISTORY - 1) + i] = l[i] / 32768.0;
@@ -171,13 +161,14 @@ void loop() {
 
   static uint32_t oldtime = 0;
   uint16_t touch_value;
-  touch_pad_read(TOUCH_PAD_NUM9, &touch_value);
+  //touch_pad_read(TOUCH_PAD_NUM9, &touch_value);
+  /*
   if ((touch_value < 1000) && (millis() - oldtime > 1000)) {
     oldtime = millis();
     CurrentMode = PLAYMODE((CurrentMode + 1) % MODE_MAX);
   }
   else if (touch_value > 1000)
     oldtime = 0;
-
+*/
   yield();
 }
