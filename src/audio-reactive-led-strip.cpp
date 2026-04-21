@@ -8,8 +8,8 @@
  */
 
 #include <FastLED.h>
-#include "includes/FFT.h"
-#include "includes/VisualEffect.h"
+#include "FFT.h"
+#include "VisualEffect.h"
 
 /* Some viriables in programs
 *
