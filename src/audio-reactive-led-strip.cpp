@@ -54,6 +54,7 @@ const uint8_t I2S_SCK = 12;
 const uint8_t I2S_WS = 13;
 const uint8_t I2S_DIN = 1;
 
+const uint8_t LR_PIN = 44;
 
 const uint16_t BUFFER_SIZE = 1024;
 const uint8_t N_ROLLING_HISTORY = 2;
@@ -85,6 +86,9 @@ PLAYMODE CurrentMode = MODE_SCROLL;
 I2SClass i2s;
 
 void setup() {
+  pinMode(LR_PIN, OUTPUT);
+  digitalWrite(LR_PIN, LOW);
+
   FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(physic_leds, N_PIXELS);
   //FastLED.addLeds<APA102, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, GRB>(physic_leds, N_PIXELS);
   Serial.begin(115200);
