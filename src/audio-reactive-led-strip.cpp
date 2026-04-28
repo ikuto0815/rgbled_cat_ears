@@ -50,9 +50,9 @@
 */
 
 #include "ESP_I2S.h"
-const uint8_t I2S_SCK = 14;
-const uint8_t I2S_WS = 27;
-const uint8_t I2S_DIN = 32;
+const uint8_t I2S_SCK = 12;
+const uint8_t I2S_WS = 13;
+const uint8_t I2S_DIN = 1;
 
 
 const uint16_t BUFFER_SIZE = 1024;
@@ -64,11 +64,7 @@ const float MIN_FREQUENCY = 200;
 const float MAX_FREQUENCY = 12000;
 const float MIN_VOLUME_THRESHOLD = 0.0003;
 
-const int PDM_WS_IO_PIN = 27;
-const int PDM_DATA_IN_PIN = 32;
-const int LED_STRIP_DATA_PIN = 13;
-const int LED_STRIP_CLOCK_PIN = 17;
-const touch_pad_t TOUCH_PAD_PIN = TOUCH_PAD_NUM9; /*TOUCH_PAD_NUM9 is GPIO32*/
+const int LED_STRIP_DATA_PIN = 2;
 
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
 class FFT fft(BUFFER_SIZE*N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE, MIN_VOLUME_THRESHOLD);
