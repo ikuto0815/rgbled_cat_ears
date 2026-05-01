@@ -65,61 +65,66 @@ const float MIN_FREQUENCY = 200;
 const float MAX_FREQUENCY = 12000;
 const float MIN_VOLUME_THRESHOLD = 0.0003;
 
+const uint8_t BUTTON = 0;
+
 const int LED_STRIP_DATA_PIN = 2;
 
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
-class FFT fft(BUFFER_SIZE*N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE, MIN_VOLUME_THRESHOLD);
+class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE,
+	      MIN_VOLUME_THRESHOLD);
 class VisualEffect effect(N_MEL_BIN, N_PIXELS);
 CRGB physic_leds[N_PIXELS];
 
 typedef enum PLAYMODE {
-  MODE_OFF = 0,
-  MODE_ON = 1,
-  MODE_RAINBOW = 2,
-  MODE_SCROLL = 3,
-  MODE_ENERGY = 4,
-  MODE_SPECTRUM = 5,
-  MODE_MAX
+	MODE_OFF = 0,
+	MODE_ON = 1,
+	MODE_RAINBOW = 2,
+	MODE_SCROLL = 3,
+	MODE_ENERGY = 4,
+	MODE_SPECTRUM = 5,
+	MODE_MAX
 };
 PLAYMODE CurrentMode = MODE_SCROLL;
 
 I2SClass i2s;
 
-void setup() {
-  pinMode(LR_PIN, OUTPUT);
-  digitalWrite(LR_PIN, LOW);
+void setup()
+{
+	pinMode(LR_PIN, OUTPUT);
+	digitalWrite(LR_PIN, LOW);
 
-  FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(physic_leds, N_PIXELS);
-  //FastLED.addLeds<APA102, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, GRB>(physic_leds, N_PIXELS);
-  Serial.begin(115200);
-    // Set up the pins used for audio input
-  i2s.setPins(I2S_SCK, I2S_WS, -1, I2S_DIN);
+	pinMode(BUTTON, INPUT);
 
-  // Initialize the I2S bus in standard mode
-  if (!i2s.begin(I2S_MODE_STD,
-                  SAMPLE_RATE, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO, I2S_STD_SLOT_LEFT)) {
-    Serial.println("Failed to initialize I2S bus!");
-    return;
-  }
+	FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(physic_leds, N_PIXELS);
+	//FastLED.addLeds<APA102, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, GRB>(physic_leds, N_PIXELS);
+	Serial.begin(115200);
+	// Set up the pins used for audio input
+	i2s.setPins(I2S_SCK, I2S_WS, -1, I2S_DIN);
 
+	// Initialize the I2S bus in standard mode
+	if (!i2s.begin(I2S_MODE_STD, SAMPLE_RATE, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO, I2S_STD_SLOT_LEFT)) {
+		Serial.println("Failed to initialize I2S bus!");
+		return;
+	}
 }
 
-void loop() {
-  static float mel_data[N_MEL_BIN];
+void loop()
+{
+	static float mel_data[N_MEL_BIN];
 
-  for (int i = 0; i < N_ROLLING_HISTORY - 1; i++)
-    memcpy(y_data + i * BUFFER_SIZE, y_data + (i + 1)*BUFFER_SIZE, sizeof(float)*BUFFER_SIZE);
+	for (int i = 0; i < N_ROLLING_HISTORY - 1; i++)
+		memcpy(y_data + i * BUFFER_SIZE, y_data + (i + 1) * BUFFER_SIZE, sizeof(float) * BUFFER_SIZE);
 
-  int16_t l[BUFFER_SIZE];
+	int16_t l[BUFFER_SIZE];
 
-  unsigned int read_num;
-  i2s.readBytes((char*)l, BUFFER_SIZE * 2);
-  //i2s_read(I2S_NUM_0, l, BUFFER_SIZE * 2, &read_num, portMAX_DELAY);
+	unsigned int read_num;
+	i2s.readBytes((char *)l, BUFFER_SIZE * 2);
+	//i2s_read(I2S_NUM_0, l, BUFFER_SIZE * 2, &read_num, portMAX_DELAY);
 
-  for (int i = 0; i < BUFFER_SIZE; i++) {
-    y_data[BUFFER_SIZE * (N_ROLLING_HISTORY - 1) + i] = l[i] / 32768.0;
+	for (int i = 0; i < BUFFER_SIZE; i++) {
+		y_data[BUFFER_SIZE * (N_ROLLING_HISTORY - 1) + i] = l[i] / 32768.0;
 
-    /*
+		/*
     * This should output the current time(in millisececonds) every second.
     * The output frequency larger than one second greatly, means the CPU is overload.
     *
@@ -128,47 +133,44 @@ void loop() {
     * if (ii % SAMPLE_RATE == 0)
     *   Serial.printf("%d\n", millis());
     */
+	}
 
-  }
+	fft.t2mel(y_data, mel_data);
 
-  fft.t2mel( y_data, mel_data );
+	switch (CurrentMode) {
+	case MODE_OFF:
+		fill_solid(physic_leds, N_PIXELS, CRGB::Black);
+		break;
+	case MODE_ON:
+		fill_solid(physic_leds, N_PIXELS, CRGB::White);
+		break;
+	case MODE_SCROLL:
+		effect.visualize_scroll(mel_data, physic_leds);
+		break;
+	case MODE_ENERGY:
+		effect.visualize_energy(mel_data, physic_leds);
+		break;
+	case MODE_SPECTRUM:
+		effect.visualize_spectrum(mel_data, physic_leds);
+		break;
+	case MODE_RAINBOW:
+		static uint8_t gHue = 0;
+		fill_rainbow(physic_leds, N_PIXELS, gHue, 7);
+		EVERY_N_MILLISECONDS(20)
+		{
+			gHue++;
+		}
+		break;
+	}
+	FastLED.show();
 
-  switch (CurrentMode) {
-    case MODE_OFF:
-      fill_solid(physic_leds, N_PIXELS, CRGB::Black);
-      break;
-    case MODE_ON:
-      fill_solid(physic_leds, N_PIXELS, CRGB::White);
-      break;
-    case MODE_SCROLL:
-      effect.visualize_scroll(mel_data, physic_leds);
-      break;
-    case MODE_ENERGY:
-      effect.visualize_energy(mel_data, physic_leds);
-      break;
-    case MODE_SPECTRUM:
-      effect.visualize_spectrum(mel_data, physic_leds);
-      break;
-    case MODE_RAINBOW:
-      static uint8_t gHue = 0;
-      fill_rainbow(physic_leds, N_PIXELS, gHue, 7);
-      EVERY_N_MILLISECONDS( 20 ) {
-        gHue++;
-      }
-      break;
-  }
-  FastLED.show();
+	static uint32_t oldtime = 0;
+	uint16_t button_state = digitalRead(BUTTON);
+	if ((button_state == 0) && (millis() - oldtime > 1000)) {
+		oldtime = millis();
+		CurrentMode = PLAYMODE((CurrentMode + 1) % MODE_MAX);
+	} else if (button_state != 0)
+		oldtime = 0;
 
-  static uint32_t oldtime = 0;
-  uint16_t touch_value;
-  //touch_pad_read(TOUCH_PAD_NUM9, &touch_value);
-  /*
-  if ((touch_value < 1000) && (millis() - oldtime > 1000)) {
-    oldtime = millis();
-    CurrentMode = PLAYMODE((CurrentMode + 1) % MODE_MAX);
-  }
-  else if (touch_value > 1000)
-    oldtime = 0;
-*/
-  yield();
+	yield();
 }
