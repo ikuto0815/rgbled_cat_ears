@@ -23,6 +23,7 @@ class VisualEffect {
 		void mirror(CRGB *physic_leds);
 		float *_spectrum, *_prev_spectrum;
 
+		void visualize_scroll_virt(float *mel_data, uint8_t led_num);
 	public:
 		VisualEffect(uint16_t mel_num, uint16_t leds_num);
 		void visualize_scroll(float *mel_data, CRGB *physic_leds);
@@ -72,22 +73,23 @@ VisualEffect::~VisualEffect()
 	delete[] _prev_spectrum;
 }
 
+#define SET_PHYS_LED(phy, i) \
+	physic_leds[phy].r = _leds[0][i]; \
+	physic_leds[phy].g = _leds[1][i]; \
+	physic_leds[phy].b = _leds[2][i];
+
 void VisualEffect::mirror(CRGB *physic_leds)
 {
 	for (int i = 0; i < _leds_num / 2; i++) {
-		physic_leds[_leds_num / 2 + i].r = _leds[0][i];
-		physic_leds[_leds_num / 2 + i].g = _leds[1][i];
-		physic_leds[_leds_num / 2 + i].b = _leds[2][i];
-		physic_leds[_leds_num / 2 - i - 1].r = _leds[0][i];
-		physic_leds[_leds_num / 2 - i - 1].g = _leds[1][i];
-		physic_leds[_leds_num / 2 - i - 1].b = _leds[2][i];
+		SET_PHYS_LED(_leds_num / 2 + i, i);
+		SET_PHYS_LED(_leds_num / 2 - i - 1, i);
 	}
 }
 
-void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
+void VisualEffect::visualize_scroll_virt(float *mel_data, uint8_t led_num)
 {
 	float rr, gg, bb;
-
+	
 	for (int i = 0; i < _mel_num; i++)
 		mel_data[i] = mel_data[i] * mel_data[i];
 
@@ -107,19 +109,23 @@ void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
 		else
 			gg = std::max(gg, mel_data[i]);
 
-	for (int i = _leds_num / 2 - 1; i > 0; i--) {
+	for (int i = led_num - 1; i > 0; i--) {
 		_leds[0][i] = (_leds[0][i - 1] == 0) ? 0 : _leds[0][i - 1] - 1;
 		_leds[1][i] = (_leds[1][i - 1] == 0) ? 0 : _leds[1][i - 1] - 1;
 		_leds[2][i] = (_leds[2][i - 1] == 0) ? 0 : _leds[2][i - 1] - 1;
 	}
-	_gauss02->process(_leds[0], _leds_num / 2);
-	_gauss02->process(_leds[1], _leds_num / 2);
-	_gauss02->process(_leds[2], _leds_num / 2);
+	_gauss02->process(_leds[0], led_num);
+	_gauss02->process(_leds[1], led_num);
+	_gauss02->process(_leds[2], led_num);
 
 	_leds[0][0] = 255 * rr;
 	_leds[1][0] = 255 * gg;
 	_leds[2][0] = 255 * bb;
+}
 
+void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
+{
+	visualize_scroll_virt(mel_data, _leds_num / 2);
 	mirror(physic_leds);
 }
 
