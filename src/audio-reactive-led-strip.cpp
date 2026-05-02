@@ -83,7 +83,7 @@ typedef enum PLAYMODE {
 	MODE_ENERGY = 4,
 	MODE_SPECTRUM = 5,
 	MODE_MAX
-};
+} PLAYMODE;
 PLAYMODE CurrentMode = MODE_SCROLL;
 
 I2SClass i2s;
