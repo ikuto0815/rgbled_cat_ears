@@ -139,14 +139,11 @@ void VisualEffect::visualize_scroll_generic(float *mel_data, CRGB *physic_leds, 
 	visualize_scroll_virt(mel_data, _leds_num / 2); //len of longest line would be enought though..
 
 	for (int i = 0; i < _leds_num / 2; i++) {
-		Serial.printf("i %02d ", i);
 		for (int j = 0; j < num_lines; j++) {
 			if (lines[j].len > i) {
-				Serial.printf("%02d ", lines[j].start + (i * lines[j].dir));
 				SET_PHYS_LED(lines[j].start + (i * lines[j].dir), i);
 			}
 		}
-		Serial.println();
 	}
 }
 
