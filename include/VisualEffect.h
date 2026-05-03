@@ -150,6 +150,7 @@ void VisualEffect::visualize_scroll_generic(float *mel_data, CRGB *physic_leds, 
 	}
 }
 
+/* like scroll but only add colorto the ears, starting at the tips */
 void VisualEffect::visualize_scroll_ears(float *mel_data, CRGB *physic_leds)
 {
 	static scroll_line lines[4] = {
@@ -160,6 +161,7 @@ void VisualEffect::visualize_scroll_ears(float *mel_data, CRGB *physic_leds)
 	visualize_scroll_generic(mel_data, physic_leds, lines, 4);
 }
 
+/* like scroll_ears but continue across the headband */
 void VisualEffect::visualize_scroll_ears_2(float *mel_data, CRGB *physic_leds)
 {
 	static scroll_line lines[4] = {
@@ -170,6 +172,7 @@ void VisualEffect::visualize_scroll_ears_2(float *mel_data, CRGB *physic_leds)
 	visualize_scroll_generic(mel_data, physic_leds, lines, 4);
 }
 
+/* scroll color based on current audio frequencies */
 void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
 {
 	static scroll_line lines[2] = {
@@ -178,6 +181,7 @@ void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
 	visualize_scroll_generic(mel_data, physic_leds, lines, 2);
 }
 
+/* flashes for every beat depending on volume */
 void VisualEffect::visualize_energy(float *mel_data, CRGB *physic_leds)
 {
 	float rr, gg, bb;
@@ -223,6 +227,7 @@ void VisualEffect::visualize_energy(float *mel_data, CRGB *physic_leds)
 	mirror(physic_leds);
 }
 
+/* spectrum of active frequencies */
 void VisualEffect::visualize_spectrum(float *mel_data, CRGB *physic_leds)
 {
 	float one_unit = 1.0 / (_leds_num / 2 - 1);
