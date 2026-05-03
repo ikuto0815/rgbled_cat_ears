@@ -14,6 +14,12 @@
 #include "ExpFilter.h"
 #include "gaussian_filter1d.h"
 
+typedef struct scroll_line {
+	int start;
+	int len;
+	int dir;
+} scroll_line;
+
 class VisualEffect {
 	private:
 		class ExpFilter *_gain, *_p_filt_r, *_p_filt_g, *_p_filt_b, *_common_mode, *_r_filt, *_g_filt, *_b_filt;
@@ -27,6 +33,9 @@ class VisualEffect {
 	public:
 		VisualEffect(uint16_t mel_num, uint16_t leds_num);
 		void visualize_scroll(float *mel_data, CRGB *physic_leds);
+		void visualize_scroll_ears(float *mel_data, CRGB *physic_leds);
+		void visualize_scroll_ears_2(float *mel_data, CRGB *physic_leds);
+		void visualize_scroll_generic(float *mel_data, CRGB *physic_leds, scroll_line *lines, uint8_t num_lines);
 		void visualize_energy(float *mel_data, CRGB *physic_leds);
 		void visualize_spectrum(float *mel_data, CRGB *physic_leds);
 		~VisualEffect();
@@ -123,10 +132,48 @@ void VisualEffect::visualize_scroll_virt(float *mel_data, uint8_t led_num)
 	_leds[2][0] = 255 * bb;
 }
 
+void VisualEffect::visualize_scroll_generic(float *mel_data, CRGB *physic_leds, scroll_line *lines, uint8_t num_lines)
+{
+	visualize_scroll_virt(mel_data, _leds_num / 2); //len of longest line would be enought though..
+
+	for (int i = 0; i < _leds_num / 2; i++) {
+		Serial.printf("i %02d ", i);
+		for (int j = 0; j < num_lines; j++) {
+			if (lines[j].len > i) {
+				Serial.printf("%02d ", lines[j].start + (i * lines[j].dir));
+				SET_PHYS_LED(lines[j].start + (i * lines[j].dir), i);
+			}
+		}
+		Serial.println();
+	}
+}
+
+void VisualEffect::visualize_scroll_ears(float *mel_data, CRGB *physic_leds)
+{
+	static scroll_line lines[4] = {
+	{.start = 14, .len = 8, .dir = -1},
+	{.start = 15, .len = 8, .dir = 1},
+	{.start = 35, .len = 8, .dir = -1},
+	{.start = 36, .len = 8, .dir = 1}};
+	visualize_scroll_generic(mel_data, physic_leds, lines, 4);
+}
+
+void VisualEffect::visualize_scroll_ears_2(float *mel_data, CRGB *physic_leds)
+{
+	static scroll_line lines[4] = {
+	{.start = 14, .len = 15, .dir = -1},
+	{.start = 15, .len = 11, .dir = 1},
+	{.start = 35, .len = 11, .dir = -1},
+	{.start = 36, .len = 16, .dir = 1}};
+	visualize_scroll_generic(mel_data, physic_leds, lines, 4);
+}
+
 void VisualEffect::visualize_scroll(float *mel_data, CRGB *physic_leds)
 {
-	visualize_scroll_virt(mel_data, _leds_num / 2);
-	mirror(physic_leds);
+	static scroll_line lines[2] = {
+	{.start = _leds_num / 2 - 1, .len = _leds_num / 2, .dir = -1},
+	{.start = _leds_num / 2, .len = _leds_num / 2, .dir = 1}};
+	visualize_scroll_generic(mel_data, physic_leds, lines, 2);
 }
 
 void VisualEffect::visualize_energy(float *mel_data, CRGB *physic_leds)

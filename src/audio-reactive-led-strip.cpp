@@ -39,14 +39,16 @@ CRGB physic_leds[N_PIXELS];
 
 typedef enum PLAYMODE {
 	MODE_OFF = 0,
-	MODE_ON = 1,
-	MODE_RAINBOW = 2,
-	MODE_SCROLL = 3,
-	MODE_ENERGY = 4,
-	MODE_SPECTRUM = 5,
+	MODE_ON,
+	MODE_RAINBOW,
+	MODE_SCROLL,
+	MODE_SCROLL2,
+	MODE_SCROLL3,
+	MODE_ENERGY,
+	MODE_SPECTRUM,
 	MODE_MAX
 } PLAYMODE;
-PLAYMODE CurrentMode = MODE_SCROLL;
+PLAYMODE CurrentMode = MODE_SCROLL3;
 
 I2SClass i2s;
 
@@ -99,15 +101,30 @@ void loop()
 
 	fft.t2mel(y_data, mel_data);
 
+	CHSV hsv;
+	static uint8_t gHue = 0;
+	hsv.hue = gHue;
+	hsv.val = 255;
+	hsv.sat = 240;
+	gHue++;
 	switch (CurrentMode) {
+	case MODE_MAX:
 	case MODE_OFF:
 		fill_solid(physic_leds, N_PIXELS, CRGB::Black);
 		break;
 	case MODE_ON:
-		fill_solid(physic_leds, N_PIXELS, CRGB::White);
+		fill_solid(physic_leds, N_PIXELS, hsv);
 		break;
 	case MODE_SCROLL:
 		effect.visualize_scroll(mel_data, physic_leds);
+		break;
+	case MODE_SCROLL2:
+		fill_solid(physic_leds, N_PIXELS, hsv);
+		effect.visualize_scroll_ears(mel_data, physic_leds);
+		break;
+	case MODE_SCROLL3:
+		fill_solid(physic_leds, N_PIXELS, hsv);
+		effect.visualize_scroll_ears_2(mel_data, physic_leds);
 		break;
 	case MODE_ENERGY:
 		effect.visualize_energy(mel_data, physic_leds);
@@ -116,7 +133,6 @@ void loop()
 		effect.visualize_spectrum(mel_data, physic_leds);
 		break;
 	case MODE_RAINBOW:
-		static uint8_t gHue = 0;
 		fill_rainbow(physic_leds, N_PIXELS, gHue, 7);
 		EVERY_N_MILLISECONDS(20)
 		{
