@@ -11,63 +11,25 @@
 #include "FFT.h"
 #include "VisualEffect.h"
 
-/* Some viriables in programs
-*
-* BUFFER_SIZE: How many samples to be received each time. This number must be the power of 2.
-* const uint16_t BUFFER_SIZE = 1024;
-*
-* N_ROLLING_HISTORY: How many buffers to be processed each time. This number must be the power of 2: 1,2,4,8,...
-* const uint8_t N_ROLLING_HISTORY = 2;
-*
-* SAMPLE_RATE: The sample rate of the audio every second.
-* const uint16_t SAMPLE_RATE = 44100;
-*
-* N_PIXELS: The number of the LEDS on the led strip, it must be even.
-* const uint16_t N_PIXELS = 60;
-*
-* N_MEL_BIN: The number of the channels of the mel frequency.
-* const uint16_t N_MEL_BIN = 18;
-*
-* MIN_FREQUENCY, MAX_FREQUENCY: The audio's min/max frequency to be processed. The max frequency always less than SAMPLE_RATE/2
-* const float MIN_FREQUENCY = 200;
-* const float MAX_FREQUENCY = 12000;
-*
-* MIN_VOLUME_THRESHOLD: If the audio's volume is less than this number, the signal will not be processed.
-* const float MIN_VOLUME_THRESHOLD = 0.0003;
-*
-* PDM_WS_IO_PIN, PDM_DATA_IN_PIN: Microphone(type of PDM)'s WS Pin and DATA_IN Pin, connecting to GPIO
-* const int PDM_WS_IO_PIN = 19;
-* const int PDM_DATA_IN_PIN = 22;
-*
-* LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN: Led-strip's data pin and clock pin, connecting to GPIO
-* If you use a led-strip with clock pin, you should modify the FastLED.addLeds calling in programs.
-* const int LED_STRIP_DATA_PIN = 21;
-* const int LED_STRIP_CLOCK_PIN = 17;
-*
-* TOUCH_PAD_PIN: TOUCH PAD's number. TOUCH_PAD_NUM9 is GPIO32. https://github.com/espressif/arduino-esp32/blob/master/tools/sdk/include/driver/driver/touch_pad.h
-* const touch_pad_t TOUCH_PAD_PIN = TOUCH_PAD_NUM9;
-*
-*/
-
 #include "ESP_I2S.h"
-const uint8_t I2S_SCK = 12;
-const uint8_t I2S_WS = 13;
-const uint8_t I2S_DIN = 1;
+const uint8_t I2S_SCK = 12; /* mic SCK pin */
+const uint8_t I2S_WS = 13; /* mic WS pin */
+const uint8_t I2S_DIN = 1; /* mic SD pin */
 
-const uint8_t LR_PIN = 44;
+const uint8_t LR_PIN = 44; /* Pull low to mic outputs on the left channel */
 
-const uint16_t BUFFER_SIZE = 1024;
-const uint8_t N_ROLLING_HISTORY = 2;
-const uint16_t SAMPLE_RATE = 44100;
-const uint16_t N_PIXELS = 52;
-const uint16_t N_MEL_BIN = 18;
-const float MIN_FREQUENCY = 200;
-const float MAX_FREQUENCY = 12000;
-const float MIN_VOLUME_THRESHOLD = 0.0003;
+const uint16_t BUFFER_SIZE = 1024; /* samples per read, must be a power of 2 */
+const uint8_t N_ROLLING_HISTORY = 2; /* number of buffers to process each time, must be a power of 2 */
+const uint16_t SAMPLE_RATE = 44100; /* audio sample rate */
+const uint16_t N_PIXELS = 52; /* LED strip length */
+const uint16_t N_MEL_BIN = 18; /* number of mel frequency channels */
+const float MIN_FREQUENCY = 200; /* min audio frequency to process */
+const float MAX_FREQUENCY = 12000; /* max audio frequency to process, must be < SEMPLE_RATE/2 */
+const float MIN_VOLUME_THRESHOLD = 0.0003; /* minimum audio volume to process */
 
-const uint8_t BUTTON = 0;
+const uint8_t BUTTON = 0; /* Boot button present on basically every ESP32-S3 board */
 
-const int LED_STRIP_DATA_PIN = 2;
+const int LED_STRIP_DATA_PIN = 2; /* LED strip data pin */
 
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
 class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE,
