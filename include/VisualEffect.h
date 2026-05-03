@@ -20,6 +20,8 @@ typedef struct scroll_line {
 	int dir;
 } scroll_line;
 
+static uint8_t max_brightness = 255;
+
 class VisualEffect {
 	private:
 		class ExpFilter *_gain, *_p_filt_r, *_p_filt_g, *_p_filt_b, *_common_mode, *_r_filt, *_g_filt, *_b_filt;
@@ -127,9 +129,9 @@ void VisualEffect::visualize_scroll_virt(float *mel_data, uint8_t led_num)
 	_gauss02->process(_leds[1], led_num);
 	_gauss02->process(_leds[2], led_num);
 
-	_leds[0][0] = 255 * rr;
-	_leds[1][0] = 255 * gg;
-	_leds[2][0] = 255 * bb;
+	_leds[0][0] = max_brightness * rr;
+	_leds[1][0] = max_brightness * gg;
+	_leds[2][0] = max_brightness * bb;
 }
 
 void VisualEffect::visualize_scroll_generic(float *mel_data, CRGB *physic_leds, scroll_line *lines, uint8_t num_lines)
@@ -206,9 +208,9 @@ void VisualEffect::visualize_energy(float *mel_data, CRGB *physic_leds)
 	gg = gg * _leds_num / 2 / gi;
 
 	for (int i = 0; i < _leds_num / 2; i++) {
-		_leds[0][i] = (i + 1 > rr) ? 0 : 255;
-		_leds[1][i] = (i + 1 > gg) ? 0 : 255;
-		_leds[2][i] = (i + 1 > bb) ? 0 : 255;
+		_leds[0][i] = (i + 1 > rr) ? 0 : max_brightness;
+		_leds[1][i] = (i + 1 > gg) ? 0 : max_brightness;
+		_leds[2][i] = (i + 1 > bb) ? 0 : max_brightness;
 	}
 
 	_p_filt_r->update(_leds[0]);
@@ -239,9 +241,9 @@ void VisualEffect::visualize_spectrum(float *mel_data, CRGB *physic_leds)
 	_common_mode->update0(_spectrum);
 
 	for (int i = 0; i < _leds_num / 2; i++) {
-		_leds[0][i] = (_spectrum[i] - _common_mode->value()[i]) * 255;
-		_leds[1][i] = fabs(_spectrum[i] - _prev_spectrum[i]) * 255;
-		_leds[2][i] = _spectrum[i] * 255;
+		_leds[0][i] = (_spectrum[i] - _common_mode->value()[i]) * max_brightness;
+		_leds[1][i] = fabs(_spectrum[i] - _prev_spectrum[i]) * max_brightness;
+		_leds[2][i] = _spectrum[i] * max_brightness;
 		_prev_spectrum[i] = _spectrum[i];
 	}
 	_r_filt->update(_leds[0]);
