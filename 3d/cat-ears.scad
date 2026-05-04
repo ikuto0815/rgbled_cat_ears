@@ -16,9 +16,9 @@ bottomRadius = 100; // [20:600]
 endRadius = 10; // [0:50]
 
 // Height of the headband
-height = 6; // [0:0.1:30]
+height = 5; // [0:0.1:30]
 // Width of the headband
-width = 2.7; // [0:0.1:30]
+width = 4.6; // [0:0.1:30]
 
 /*[ Ears ]*/
 
@@ -42,7 +42,7 @@ earConnectorRadius = 7; // [2:50]
 // Should be smaller than upperAngle otherwise spikes will be detached
 spikesAngle = 80; // [0:120]
 // How long the spikes are. Increase for more grip
-spikeDepth = 2.5; // [0:0.1:10]
+spikeDepth = 0.0; // [0:0.1:10]
 // How high the spikes are.
 spikeHeight = 4; // [0:0.1:10]
 // How high the spikes are at the tip.
@@ -50,19 +50,19 @@ spikeHeightEnd = 1.5; // [0:0.1:10]
 // How wide the spikes are.
 spikeWidth = 1.4; // [0:0.1:20]
 // Spikes per cm
-spikeDensity = 3; // [0.1:0.01:20]
+spikeDensity = 0; // [0.1:0.01:20]
 
 /*[ Rudelblinken ]*/
 
 // Enable support for a rudelblinken PCB
-enableRudelblinken = false;
+enableRudelblinken = true;
 
 /*[ LED recess ]*/
 
 // How deep the recess should be
 recessDepth = 0; // [0:0.05:5]
 // How wide the recess should be
-recessWidth = 4; // [0:0.1:20]
+recessWidth = 0; // [0:0.1:20]
 
 // Secret section with a boring name
 /*[ About ]*/
@@ -75,7 +75,7 @@ protection = false;
 
 /*[ Hidden ]*/
 rudelblinken_board_height = 1.6;
-rudelblinken_board_length = 33.6;
+rudelblinken_board_length = 30.0;
 
 module mirror_copy(vector)
 {
