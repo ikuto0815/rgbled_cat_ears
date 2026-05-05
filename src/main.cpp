@@ -11,6 +11,9 @@
 #include "FFT.h"
 #include "VisualEffect.h"
 
+#include "ble.h"
+#include "settings.h"
+
 #include "ESP_I2S.h"
 const uint8_t I2S_SCK = 12; /* mic SCK pin */
 const uint8_t I2S_WS = 13; /* mic WS pin */
@@ -51,6 +54,8 @@ typedef enum PLAYMODE {
 PLAYMODE CurrentMode = MODE_SCROLL3;
 
 I2SClass i2s;
+Ble *ble;
+
 
 void setup()
 {
@@ -70,6 +75,8 @@ void setup()
 		Serial.println("Failed to initialize I2S bus!");
 		return;
 	}
+
+	ble = new Ble();
 }
 
 void loop()
@@ -105,7 +112,7 @@ void loop()
 	CHSV hsv;
 	static uint8_t gHue = 0;
 	hsv.hue = gHue;
-	hsv.val = 255;
+	hsv.val = max_brightness;
 	hsv.sat = 240;
 	gHue++;
 	switch (CurrentMode) {
@@ -114,8 +121,14 @@ void loop()
 		fill_solid(physic_leds, N_PIXELS, CRGB::Black);
 		break;
 	case MODE_ON:
-		fill_solid(physic_leds, N_PIXELS, hsv);
+	{
+		CRGB rgb;
+		rgb.r = color & 0xFF;
+		rgb.g = (color >> 8) & 0xFF;
+		rgb.b = (color >> 16) & 0xFF;
+		fill_solid(physic_leds, N_PIXELS, rgb);
 		break;
+	}
 	case MODE_SCROLL:
 		effect.visualize_scroll(mel_data, physic_leds);
 		break;

@@ -14,13 +14,14 @@
 #include "ExpFilter.h"
 #include "gaussian_filter1d.h"
 
+#include "settings.h"
+
 typedef struct scroll_line {
 	int start;
 	int len;
 	int dir;
 } scroll_line;
 
-static uint8_t max_brightness = 255;
 
 class VisualEffect {
 	private:
