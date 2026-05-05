@@ -89,14 +89,15 @@ void loop()
 		y_data[BUFFER_SIZE * (N_ROLLING_HISTORY - 1) + i] = l[i] / 32768.0;
 
 		/*
-    * This should output the current time(in millisececonds) every second.
-    * The output frequency larger than one second greatly, means the CPU is overload.
-    *
-    * static uint32_t ii = 0;
-    * ii++;
-    * if (ii % SAMPLE_RATE == 0)
-    *   Serial.printf("%d\n", millis());
-    */
+		 * This should output the current time(in millisececonds) every second.
+		 * The output frequency larger than one second greatly, means the CPU is overload.
+		 */
+#if 0
+		static uint32_t ii = 0;
+		ii++;
+		if (ii % SAMPLE_RATE == 0)
+			Serial.printf("%ld\n", millis());
+#endif
 	}
 
 	fft.t2mel(y_data, mel_data);
