@@ -40,18 +40,7 @@ class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQ
 CRGB physic_leds[N_PIXELS];
 class VisualEffect effect(N_MEL_BIN, N_PIXELS, physic_leds);
 
-typedef enum PLAYMODE {
-	MODE_OFF = 0,
-	MODE_ON,
-	MODE_RAINBOW,
-	MODE_SCROLL,
-	MODE_SCROLL2,
-	MODE_SCROLL3,
-	MODE_ENERGY,
-	MODE_SPECTRUM,
-	MODE_MAX
-} PLAYMODE;
-PLAYMODE CurrentMode = MODE_SCROLL3;
+uint8_t CurrentMode = 1;
 
 I2SClass i2s;
 Ble *ble;
@@ -108,41 +97,15 @@ void loop()
 	}
 
 	fft.t2mel(y_data, mel_data);
-
-	switch (CurrentMode) {
-	case MODE_MAX:
-	case MODE_OFF:
-		effect.visualize_off();
-		break;
-	case MODE_ON:
-		effect.visualize_solid();
-		break;
-	case MODE_SCROLL:
-		effect.visualize_scroll(mel_data);
-		break;
-	case MODE_SCROLL2:
-		effect.visualize_scroll_ears(mel_data);
-		break;
-	case MODE_SCROLL3:
-		effect.visualize_scroll_ears_2(mel_data);
-		break;
-	case MODE_ENERGY:
-		effect.visualize_energy(mel_data);
-		break;
-	case MODE_SPECTRUM:
-		effect.visualize_spectrum(mel_data);
-		break;
-	case MODE_RAINBOW:
-		effect.visualize_rainbow();
-		break;
-	}
+	effect.visualize(mel_data);
 	FastLED.show();
 
 	static uint32_t oldtime = 0;
 	uint16_t button_state = digitalRead(BUTTON);
 	if ((button_state == 0) && (millis() - oldtime > 1000)) {
 		oldtime = millis();
-		CurrentMode = PLAYMODE((CurrentMode + 1) % MODE_MAX);
+		CurrentMode = (CurrentMode + 1) % (sizeof(modes) / sizeof(*modes));
+		effect.set_mode(CurrentMode);
 	} else if (button_state != 0)
 		oldtime = 0;
 

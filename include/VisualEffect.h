@@ -22,7 +22,6 @@ typedef struct scroll_line {
 	int dir;
 } scroll_line;
 
-
 class VisualEffect {
 	private:
 		class ExpFilter *_gain, *_p_filt_r, *_p_filt_g, *_p_filt_b, *_common_mode, *_r_filt, *_g_filt, *_b_filt;
@@ -33,22 +32,54 @@ class VisualEffect {
 		float *_spectrum, *_prev_spectrum;
 		uint8_t gHue = 0;
 		CRGB *_physic_leds;
+		float *mel_data;
+		uint8_t current_mode = 1;
 
-		void visualize_scroll_virt(float *mel_data, uint8_t led_num);
+		void visualize_scroll_virt(uint8_t led_num);
 	public:
 		VisualEffect(uint16_t mel_num, uint16_t leds_num, CRGB *physic_leds);
-		void visualize_scroll(float *mel_data);
-		void visualize_scroll_ears(float *mel_data);
-		void visualize_scroll_ears_2(float *mel_data);
-		void visualize_scroll_generic(float *mel_data, scroll_line *lines, uint8_t num_lines);
-		void visualize_energy(float *mel_data);
-		void visualize_spectrum(float *mel_data);
+		void visualize_scroll(void);
+		void visualize_scroll_ears(void);
+		void visualize_scroll_ears_2(void);
+		void visualize_scroll_generic(scroll_line *lines, uint8_t num_lines);
+		void visualize_energy(void);
+		void visualize_spectrum(void);
 		void visualize_solid(void);
 		void visualize_solid_hue(void);
 		void visualize_off(void);
 		void visualize_rainbow(void);
+		void visualize(float *_mel_data);
+
+		void set_mode(uint8_t i);
 		~VisualEffect();
 };
+
+#define MODE(name) \
+	{ #name, &VisualEffect::visualize_ ## name }
+
+typedef struct mode {
+	String name;
+	void (VisualEffect::*visualize)(void);
+} mode;
+
+mode modes[] = {
+MODE(off),
+MODE(scroll_ears_2),
+MODE(scroll_ears),
+MODE(scroll),
+MODE(solid),
+MODE(solid_hue),
+MODE(rainbow),
+MODE(energy),
+MODE(spectrum),
+};
+
+void VisualEffect::visualize(float *_mel_data)
+{
+	mel_data = _mel_data;
+	if (current_mode < sizeof(modes) / sizeof(*modes))
+		(this->*modes[current_mode].visualize)();
+}
 
 VisualEffect::VisualEffect(uint16_t mel_num, uint16_t leds_num, CRGB *physic_leds)
 {
@@ -105,7 +136,7 @@ void VisualEffect::mirror(void)
 	}
 }
 
-void VisualEffect::visualize_scroll_virt(float *mel_data, uint8_t led_num)
+void VisualEffect::visualize_scroll_virt(uint8_t led_num)
 {
 	float rr, gg, bb;
 	
@@ -142,9 +173,9 @@ void VisualEffect::visualize_scroll_virt(float *mel_data, uint8_t led_num)
 	_leds[2][0] = max_brightness * bb;
 }
 
-void VisualEffect::visualize_scroll_generic(float *mel_data, scroll_line *lines, uint8_t num_lines)
+void VisualEffect::visualize_scroll_generic(scroll_line *lines, uint8_t num_lines)
 {
-	visualize_scroll_virt(mel_data, _leds_num / 2); //len of longest line would be enought though..
+	visualize_scroll_virt(_leds_num / 2); //len of longest line would be enought though..
 
 	for (int i = 0; i < _leds_num / 2; i++) {
 		for (int j = 0; j < num_lines; j++) {
@@ -156,7 +187,7 @@ void VisualEffect::visualize_scroll_generic(float *mel_data, scroll_line *lines,
 }
 
 /* like scroll but only add colorto the ears, starting at the tips */
-void VisualEffect::visualize_scroll_ears(float *mel_data)
+void VisualEffect::visualize_scroll_ears(void)
 {
 	static scroll_line lines[4] = {
 	{.start = 14, .len = 8, .dir = -1},
@@ -165,31 +196,31 @@ void VisualEffect::visualize_scroll_ears(float *mel_data)
 	{.start = 36, .len = 8, .dir = 1}};
 
 	visualize_solid_hue();
-	visualize_scroll_generic(mel_data, lines, 4);
+	visualize_scroll_generic(lines, 4);
 }
 
 /* like scroll_ears but continue across the headband */
-void VisualEffect::visualize_scroll_ears_2(float *mel_data)
+void VisualEffect::visualize_scroll_ears_2(void)
 {
 	static scroll_line lines[4] = {
 	{.start = 14, .len = 15, .dir = -1},
 	{.start = 15, .len = 11, .dir = 1},
 	{.start = 35, .len = 11, .dir = -1},
 	{.start = 36, .len = 16, .dir = 1}};
-	visualize_scroll_generic(mel_data, lines, 4);
+	visualize_scroll_generic(lines, 4);
 }
 
 /* scroll color based on current audio frequencies */
-void VisualEffect::visualize_scroll(float *mel_data)
+void VisualEffect::visualize_scroll(void)
 {
 	static scroll_line lines[2] = {
 	{.start = _leds_num / 2 - 1, .len = _leds_num / 2, .dir = -1},
 	{.start = _leds_num / 2, .len = _leds_num / 2, .dir = 1}};
-	visualize_scroll_generic(mel_data, lines, 2);
+	visualize_scroll_generic(lines, 2);
 }
 
 /* flashes for every beat depending on volume */
-void VisualEffect::visualize_energy(float *mel_data)
+void VisualEffect::visualize_energy(void)
 {
 	float rr, gg, bb;
 	int ri, gi, bi;
@@ -235,7 +266,7 @@ void VisualEffect::visualize_energy(float *mel_data)
 }
 
 /* spectrum of active frequencies */
-void VisualEffect::visualize_spectrum(float *mel_data)
+void VisualEffect::visualize_spectrum(void)
 {
 	float one_unit = 1.0 / (_leds_num / 2 - 1);
 	int j = 1;
@@ -295,4 +326,9 @@ void VisualEffect::visualize_rainbow(void)
 {
 	fill_rainbow(_physic_leds, _leds_num, gHue, 7);
 	gHue++;
+}
+
+void VisualEffect::set_mode(uint8_t i)
+{
+	current_mode = i % (sizeof(modes) / sizeof(*modes));
 }
