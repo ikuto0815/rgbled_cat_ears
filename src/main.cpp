@@ -37,8 +37,8 @@ const int LED_STRIP_DATA_PIN = 2; /* LED strip data pin */
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
 class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE,
 	      MIN_VOLUME_THRESHOLD);
-class VisualEffect effect(N_MEL_BIN, N_PIXELS);
 CRGB physic_leds[N_PIXELS];
+class VisualEffect effect(N_MEL_BIN, N_PIXELS, physic_leds);
 
 typedef enum PLAYMODE {
 	MODE_OFF = 0,
@@ -109,49 +109,31 @@ void loop()
 
 	fft.t2mel(y_data, mel_data);
 
-	CHSV hsv;
-	static uint8_t gHue = 0;
-	hsv.hue = gHue;
-	hsv.val = max_brightness;
-	hsv.sat = 240;
-	gHue++;
 	switch (CurrentMode) {
 	case MODE_MAX:
 	case MODE_OFF:
-		fill_solid(physic_leds, N_PIXELS, CRGB::Black);
+		effect.visualize_off();
 		break;
 	case MODE_ON:
-	{
-		CRGB rgb;
-		rgb.r = color & 0xFF;
-		rgb.g = (color >> 8) & 0xFF;
-		rgb.b = (color >> 16) & 0xFF;
-		fill_solid(physic_leds, N_PIXELS, rgb);
+		effect.visualize_solid();
 		break;
-	}
 	case MODE_SCROLL:
-		effect.visualize_scroll(mel_data, physic_leds);
+		effect.visualize_scroll(mel_data);
 		break;
 	case MODE_SCROLL2:
-		fill_solid(physic_leds, N_PIXELS, hsv);
-		effect.visualize_scroll_ears(mel_data, physic_leds);
+		effect.visualize_scroll_ears(mel_data);
 		break;
 	case MODE_SCROLL3:
-		fill_solid(physic_leds, N_PIXELS, hsv);
-		effect.visualize_scroll_ears_2(mel_data, physic_leds);
+		effect.visualize_scroll_ears_2(mel_data);
 		break;
 	case MODE_ENERGY:
-		effect.visualize_energy(mel_data, physic_leds);
+		effect.visualize_energy(mel_data);
 		break;
 	case MODE_SPECTRUM:
-		effect.visualize_spectrum(mel_data, physic_leds);
+		effect.visualize_spectrum(mel_data);
 		break;
 	case MODE_RAINBOW:
-		fill_rainbow(physic_leds, N_PIXELS, gHue, 7);
-		EVERY_N_MILLISECONDS(20)
-		{
-			gHue++;
-		}
+		effect.visualize_rainbow();
 		break;
 	}
 	FastLED.show();
