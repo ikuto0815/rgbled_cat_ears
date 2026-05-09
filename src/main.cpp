@@ -40,8 +40,6 @@ class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQ
 CRGB physic_leds[N_PIXELS];
 class VisualEffect effect(N_MEL_BIN, N_PIXELS, physic_leds);
 
-uint8_t CurrentMode = 1;
-
 I2SClass i2s;
 Ble *ble;
 
