@@ -95,6 +95,7 @@ void loop()
 	}
 
 	fft.t2mel(y_data, mel_data);
+	effect.set_mode(CurrentMode);
 	effect.visualize(mel_data);
 	FastLED.show();
 
