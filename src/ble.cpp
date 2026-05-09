@@ -1,9 +1,12 @@
 #include "ble.h"
 #include "settings.h"
+#include "VisualEffectGlobal.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+
+#include <string>
 
 class ServerCallbacks : public BLEServerCallbacks {
 	public: 
@@ -38,6 +41,12 @@ class Callbacks : public BLECharacteristicCallbacks {
 		{
 			const uint8_t *data = pCharacteristic->getData();
 			size_t dataLength = pCharacteristic->getLength();
+
+			/* special handling for the mode selection */
+			if (pCharacteristic->getUUID().equals(BLEUUID(CHARACTERISTIC_MODE_UUID))) {
+				CurrentMode = mode_index((char*)data);
+				return;
+			}
 
 			if (dataLength > 0)
 				memcpy(_data, data, dataLength);
@@ -75,6 +84,15 @@ Ble::Ble(void)
 	createVariableCharacteristic(pService, (void*)&color, sizeof(uint32_t), CHARACTERISTIC_COLOR_UUID,
 				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":true})");
 				     
+	String mode_descriptor_value = String(R"({"type":"dropdown", "order":1, "disabled":false, label:"Mode", "options":[)");
+	for (int i = 0; i < mode_count(); i++)
+		mode_descriptor_value += String("\"") + modes[i].name + String("\",");
+	mode_descriptor_value.remove(mode_descriptor_value.length() - 1);
+	mode_descriptor_value += String(R"(]})");
+
+	const char *tmp_current_mode = modes[CurrentMode].name.c_str();
+	createVariableCharacteristic(pService, (void*)tmp_current_mode, strlen(tmp_current_mode) + 1, CHARACTERISTIC_MODE_UUID,
+				     mode_descriptor_value);
 	pService->start();
 
 	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
