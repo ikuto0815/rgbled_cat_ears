@@ -91,7 +91,7 @@ Ble::Ble(void)
 	createVariableCharacteristic(pService, (void*)&color, sizeof(uint32_t), CHARACTERISTIC_COLOR_UUID,
 				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":true})");
 				     
-	String mode_descriptor_value = String(R"({"type":"dropdown", "order":1, "disabled":false, label:"Mode", "options":[)");
+	String mode_descriptor_value = String(R"({"type":"dropdown", "order":3, "disabled":false, label:"Mode", "options":[)");
 	for (int i = 0; i < mode_count(); i++)
 		mode_descriptor_value += String("\"") + modes[i].name + String("\",");
 	mode_descriptor_value.remove(mode_descriptor_value.length() - 1);
