@@ -77,6 +77,13 @@ Ble::Ble(void)
 	pServer->setCallbacks(new ServerCallbacks());
 	BLEService *pService = pServer->createService(CONFIG_SERVICE_UUID);
 
+	BLECharacteristic *pCharacteristicServiceName = pService->createCharacteristic(
+		CHARACTERISTIC_CONFIG_SERVICE_NAME_UUID,
+		BLECharacteristic::PROPERTY_READ);
+	BLEDescriptor *serviceNameDescriptor = new BLEDescriptor(CUSTOM_DESCRIPTOR_UUID, 200);
+	serviceNameDescriptor->setValue(R"({"type":"serviceName", "order":1})");
+	pCharacteristicServiceName->addDescriptor(serviceNameDescriptor);
+	pCharacteristicServiceName->setValue("effect settings");
 
 	createVariableCharacteristic(pService, (void*)&max_brightness, sizeof(uint8_t), CHARACTERISTIC_BRIGHTNESS_UUID,
 				     R"({"type":"uint8slider", "order":1, "disabled":false, "label":"max brightness", "minInt":0, "maxInt":255, "stepInt":1})"); 
