@@ -46,6 +46,8 @@ Ble *ble;
 
 void setup()
 {
+	init_settings();
+
 	pinMode(LR_PIN, OUTPUT);
 	digitalWrite(LR_PIN, LOW);
 

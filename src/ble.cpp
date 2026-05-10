@@ -48,6 +48,12 @@ class Callbacks : public BLECharacteristicCallbacks {
 				return;
 			}
 
+			/* special handline for the save button */
+			if (pCharacteristic->getUUID().equals(BLEUUID(CHARACTERISTIC_SAVE_UUID))) {
+				save_settings();
+				return;
+			}
+
 			if (dataLength > 0)
 				memcpy(_data, data, dataLength);
 			else
@@ -100,6 +106,11 @@ Ble::Ble(void)
 	const char *tmp_current_mode = modes[CurrentMode].name.c_str();
 	createVariableCharacteristic(pService, (void*)tmp_current_mode, strlen(tmp_current_mode) + 1, CHARACTERISTIC_MODE_UUID,
 				     mode_descriptor_value);
+
+	uint8_t save_dummy;
+	createVariableCharacteristic(pService, (void*)&save_dummy, sizeof(uint8_t), CHARACTERISTIC_SAVE_UUID,
+				     R"({"type":"button", "order":4, "disabled":false, "label":"Save"})");
+
 	pService->start();
 
 	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
