@@ -105,7 +105,7 @@ void loop()
 	uint16_t button_state = digitalRead(BUTTON);
 	if ((button_state == 0) && (millis() - oldtime > 1000)) {
 		oldtime = millis();
-		CurrentMode = (CurrentMode + 1) % (sizeof(modes) / sizeof(*modes));
+		CurrentMode = (CurrentMode + 1) % mode_count();
 		effect.set_mode(CurrentMode);
 	} else if (button_state != 0)
 		oldtime = 0;

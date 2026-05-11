@@ -1,6 +1,6 @@
 #include "ble.h"
 #include "settings.h"
-#include "VisualEffectGlobal.h"
+#include "VisualEffect.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
