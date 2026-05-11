@@ -55,6 +55,9 @@ class VisualEffect {
 
 		void set_mode(uint8_t i);
 		~VisualEffect();
+
+		static int mode_count(void);
+		static int mode_index(char *mode);
 };
 
 #define MODE(name) \
@@ -66,5 +69,3 @@ typedef struct mode {
 } mode;
 
 extern mode modes[];
-int mode_count(void);
-int mode_index(char *mode);

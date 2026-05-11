@@ -22,14 +22,14 @@ MODE(energy),
 MODE(spectrum),
 };
 
-int mode_count(void)
+int VisualEffect::mode_count(void)
 {
 	return sizeof(modes) / sizeof(modes[0]);
 }
 
-int mode_index(char *mode)
+int VisualEffect::mode_index(char *mode)
 {
-	for (int i = 0; i < mode_count(); i++)
+	for (int i = 0; i < VisualEffect::mode_count(); i++)
 		if (!modes[i].name.compareTo(mode))
 			return i;
 

@@ -44,7 +44,7 @@ class Callbacks : public BLECharacteristicCallbacks {
 
 			/* special handling for the mode selection */
 			if (pCharacteristic->getUUID().equals(BLEUUID(CHARACTERISTIC_MODE_UUID))) {
-				CurrentMode = mode_index((char*)data);
+				CurrentMode = VisualEffect::mode_index((char*)data);
 				return;
 			}
 
@@ -98,7 +98,7 @@ Ble::Ble(void)
 				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":true})");
 				     
 	String mode_descriptor_value = String(R"({"type":"dropdown", "order":3, "disabled":false, label:"Mode", "options":[)");
-	for (int i = 0; i < mode_count(); i++)
+	for (int i = 0; i < VisualEffect::mode_count(); i++)
 		mode_descriptor_value += String("\"") + modes[i].name + String("\",");
 	mode_descriptor_value.remove(mode_descriptor_value.length() - 1);
 	mode_descriptor_value += String(R"(]})");
