@@ -16,14 +16,14 @@ bottomRadius = 100; // [20:600]
 endRadius = 10; // [0:50]
 
 // Height of the headband
-height = 5; // [0:0.1:30]
+height = 5.2; // [0:0.1:30]
 // Width of the headband
 width = 4.6; // [0:0.1:30]
 
 /*[ Ears ]*/
 
 // Where the ears are located on the headband
-earPositionAngle = 40; // [0:90]
+earPositionAngle = 41.5; // [0:90]
 
 // Radius of the curvature of the ears sides
 earRadius = 120; // [10:500]
