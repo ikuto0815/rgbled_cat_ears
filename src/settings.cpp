@@ -5,6 +5,11 @@ uint8_t max_brightness = 255;
 uint32_t color = 0xffff0000;
 uint8_t CurrentMode = 1;
 
+uint16_t led_strip_len = 60;
+uint16_t led_offset_left = 11;
+uint16_t led_ear_len = 8;
+uint16_t led_middle_gap = 6;
+
 Preferences preferences;
 
 void init_settings(void)

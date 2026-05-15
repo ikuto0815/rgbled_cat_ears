@@ -45,11 +45,11 @@ void VisualEffect::visualize(float *_mel_data)
 	(this->*modes[current_mode].visualize)();
 }
 
-VisualEffect::VisualEffect(uint16_t mel_num, uint16_t leds_num, CRGB *physic_leds)
+VisualEffect::VisualEffect(uint16_t mel_num, uint16_t leds_num)
 {
 	_mel_num = mel_num;
 	_leds_num = leds_num;
-	_physic_leds = physic_leds;
+	_physic_leds = new CRGB[_leds_num];
 	_leds[0] = new uint8_t[_leds_num / 2];
 	_leds[1] = new uint8_t[_leds_num / 2];
 	_leds[2] = new uint8_t[_leds_num / 2];
@@ -66,6 +66,8 @@ VisualEffect::VisualEffect(uint16_t mel_num, uint16_t leds_num, CRGB *physic_led
 
 	_spectrum = new float[leds_num / 2];
 	_prev_spectrum = new float[leds_num / 2];
+
+	FastLED.addLeds<NEOPIXEL, led_strip_data_pin>(_physic_leds, led_strip_len);
 }
 
 VisualEffect::~VisualEffect()

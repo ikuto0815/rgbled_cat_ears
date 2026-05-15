@@ -40,7 +40,7 @@ class VisualEffect {
 
 		void visualize_scroll_virt(uint8_t led_num);
 	public:
-		VisualEffect(uint16_t mel_num, uint16_t leds_num, CRGB *physic_leds);
+		VisualEffect(uint16_t mel_num, uint16_t leds_num);
 		void visualize_scroll(void);
 		void visualize_scroll_ears(void);
 		void visualize_scroll_ears_2(void);
