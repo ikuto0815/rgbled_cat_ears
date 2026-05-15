@@ -156,10 +156,18 @@ void VisualEffect::visualize_scroll_generic(scroll_line *lines, uint8_t num_line
 void VisualEffect::visualize_scroll_ears(void)
 {
 	static scroll_line lines[4] = {
-	{.start = 14, .len = 8, .dir = -1},
-	{.start = 15, .len = 8, .dir = 1},
-	{.start = 35, .len = 8, .dir = -1},
-	{.start = 36, .len = 8, .dir = 1}};
+	{.start = led_offset_left + led_ear_len - 1,
+	 .len = led_ear_len,
+	 .dir = -1},
+	{.start = led_offset_left + led_ear_len,
+	 .len = led_ear_len,
+	 .dir = 1},
+	{.start = led_offset_left + led_middle_gap + led_ear_len * 3 - 1,
+	 .len = led_ear_len,
+	 .dir = -1},
+	{.start = led_offset_left + led_middle_gap + led_ear_len * 3,
+	 .len = led_ear_len,
+	 .dir = 1}};
 
 	visualize_solid_hue();
 	visualize_scroll_generic(lines, 4);
@@ -169,10 +177,18 @@ void VisualEffect::visualize_scroll_ears(void)
 void VisualEffect::visualize_scroll_ears_2(void)
 {
 	static scroll_line lines[4] = {
-	{.start = 14, .len = 15, .dir = -1},
-	{.start = 15, .len = 11, .dir = 1},
-	{.start = 35, .len = 11, .dir = -1},
-	{.start = 36, .len = 16, .dir = 1}};
+	{.start = led_offset_left + led_ear_len - 1,
+	 .len = led_offset_left + led_ear_len,
+	 .dir = -1},
+	{.start = led_offset_left + led_ear_len,
+	 .len = led_ear_len + (led_middle_gap + 1) / 2,
+	 .dir = 1},
+	{.start = led_offset_left + led_middle_gap + led_ear_len * 3 - 1,
+	 .len = led_ear_len + (led_middle_gap + 1) / 2,
+	 .dir = -1},
+	{.start = led_offset_left + led_middle_gap + led_ear_len * 3,
+	 .len = led_ear_len + (led_strip_len - (led_offset_left + led_middle_gap + led_ear_len * 4)),
+	 .dir = 1}};
 	visualize_scroll_generic(lines, 4);
 }
 
