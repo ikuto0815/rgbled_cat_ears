@@ -10,6 +10,10 @@ uint16_t led_offset_left = 11;
 uint16_t led_ear_len = 8;
 uint16_t led_middle_gap = 6;
 
+float fft_min_frequency = 200;
+float fft_max_frequency = 12000;
+float fft_min_volume_threshold = 0.0003;
+
 Preferences preferences;
 
 void init_settings(void)

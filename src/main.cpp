@@ -21,19 +21,10 @@ const uint8_t I2S_DIN = 1; /* mic SD pin */
 
 const uint8_t LR_PIN = 44; /* Pull low to mic outputs on the left channel */
 
-const uint16_t BUFFER_SIZE = 1024; /* samples per read, must be a power of 2 */
-const uint8_t N_ROLLING_HISTORY = 2; /* number of buffers to process each time, must be a power of 2 */
-const uint16_t SAMPLE_RATE = 44100; /* audio sample rate */
-const uint16_t N_MEL_BIN = 18; /* number of mel frequency channels */
-const float MIN_FREQUENCY = 200; /* min audio frequency to process */
-const float MAX_FREQUENCY = 12000; /* max audio frequency to process, must be < SEMPLE_RATE/2 */
-const float MIN_VOLUME_THRESHOLD = 0.0003; /* minimum audio volume to process */
-
 const uint8_t BUTTON = 0; /* Boot button present on basically every ESP32-S3 board */
 
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
-class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE,
-	      MIN_VOLUME_THRESHOLD);
+class FFT *fft;
 class VisualEffect *effect;
 
 I2SClass i2s;
@@ -45,6 +36,8 @@ void setup()
 	init_settings();
 
 	effect = new VisualEffect(N_MEL_BIN, led_strip_len);
+	fft = new FFT(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, fft_min_frequency, fft_max_frequency, SAMPLE_RATE,
+		      fft_min_volume_threshold);
 
 	pinMode(LR_PIN, OUTPUT);
 	digitalWrite(LR_PIN, LOW);
@@ -92,7 +85,7 @@ void loop()
 #endif
 	}
 
-	fft.t2mel(y_data, mel_data);
+	fft->t2mel(y_data, mel_data);
 	effect->set_mode(CurrentMode);
 	effect->visualize(mel_data);
 	FastLED.show();
