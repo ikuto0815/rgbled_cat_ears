@@ -16,9 +16,9 @@ void init_settings(void)
 {
 	preferences.begin("rgbled_cat_ears", false);
 
-	max_brightness = preferences.getUChar("max_brightness", 255);
-	color = preferences.getUInt("color", 0xffff0000);
-	CurrentMode = preferences.getUChar("mode", 1);
+	max_brightness = preferences.getUChar("max_brightness", max_brightness);
+	color = preferences.getUInt("color", color);
+	CurrentMode = preferences.getUChar("mode", CurrentMode);
 }
 
 void save_settings(void)

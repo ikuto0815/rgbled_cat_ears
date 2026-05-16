@@ -54,6 +54,14 @@ class Callbacks : public BLECharacteristicCallbacks {
 				return;
 			}
 
+			/* special handline for the system save button */
+			/* restart needed when changing LED settings */
+			if (pCharacteristic->getUUID().equals(BLEUUID(CHARACTERISTIC_SYSTEM_SAVE_UUID))) {
+				save_settings();
+				esp_restart();
+				return;
+			}
+
 			if (dataLength > 0)
 				memcpy(_data, data, dataLength);
 			else
@@ -81,6 +89,8 @@ Ble::Ble(void)
 	BLEServer *pServer = BLEDevice::createServer();
 
 	pServer->setCallbacks(new ServerCallbacks());
+
+	/* main config service */
 	BLEService *pService = pServer->createService(CONFIG_SERVICE_UUID);
 
 	BLECharacteristic *pCharacteristicServiceName = pService->createCharacteristic(
