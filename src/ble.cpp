@@ -87,6 +87,7 @@ Ble::Ble(void)
 {
 	BLEDevice::init("RGBLED cat ears");
 	BLEServer *pServer = BLEDevice::createServer();
+	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
 
 	pServer->setCallbacks(new ServerCallbacks());
 
@@ -122,9 +123,9 @@ Ble::Ble(void)
 				     R"({"type":"button", "order":4, "disabled":false, "label":"Save"})");
 
 	pService->start();
+	pAdvertising->addServiceUUID(CONFIG_SERVICE_UUID);
 
 	/* system settings service (LED parameters, maybe more) */
-
 	BLEService *pSystemService = pServer->createService(SYSTEM_CONFIG_SERVICE_UUID);
 
 	BLECharacteristic *pCharacteristicSystemServiceName = pSystemService->createCharacteristic(
@@ -151,10 +152,8 @@ Ble::Ble(void)
 				     R"({"type":"button", "order":4, "disabled":false, "label":"Save"})");
 
 	pSystemService->start();
-
-	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-	pAdvertising->addServiceUUID(CONFIG_SERVICE_UUID);
 	pAdvertising->addServiceUUID(SYSTEM_CONFIG_SERVICE_UUID);
+
 	pAdvertising->start();
 }
 
