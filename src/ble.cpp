@@ -105,7 +105,7 @@ Ble::Ble(void)
 				     R"({"type":"uint8slider", "order":1, "disabled":false, "label":"max brightness", "minInt":0, "maxInt":255, "stepInt":1})");
 
 	createVariableCharacteristic(pService, (void*)&color, sizeof(uint32_t), CHARACTERISTIC_COLOR_UUID,
-				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":true})");
+				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":false})");
 
 	String mode_descriptor_value = String(R"({"type":"dropdown", "order":3, "disabled":false, label:"Mode", "options":[)");
 	for (int i = 0; i < VisualEffect::mode_count(); i++)
