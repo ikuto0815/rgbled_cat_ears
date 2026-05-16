@@ -148,6 +148,15 @@ Ble::Ble(void)
 	createVariableCharacteristic(pSystemService, (void*)&led_middle_gap, sizeof(uint16_t), CHARACTERISTIC_LED_MIDDLE_GAP_UUID,
 				     R"({"type":"uint16", "order":1, "disabled":false, "label":"LED middle gap"})");
 
+	createVariableCharacteristic(pSystemService, (void*)&fft_min_frequency, sizeof(float), CHARACTERISTIC_FFT_MIN_FREQUENCY_UUID,
+				     R"({"type":"float", "order":1, "disabled":false, "label":"FFT min frequency"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&fft_max_frequency, sizeof(float), CHARACTERISTIC_FFT_MAX_FREQUENCY_UUID,
+				     R"({"type":"float", "order":1, "disabled":false, "label":"FFT max frequency"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&fft_min_volume_threshold, sizeof(float), CHARACTERISTIC_FFT_MIN_VOLUME_THRESHOLD_UUID,
+				     R"({"type":"float", "order":1, "disabled":false, "label":"FFT min volume threshold"})");
+
 	createVariableCharacteristic(pSystemService, (void*)&save_dummy, sizeof(uint8_t), CHARACTERISTIC_SYSTEM_SAVE_UUID,
 				     R"({"type":"button", "order":4, "disabled":false, "label":"Save"})");
 
