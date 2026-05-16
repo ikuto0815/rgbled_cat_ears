@@ -34,7 +34,7 @@ const uint8_t BUTTON = 0; /* Boot button present on basically every ESP32-S3 boa
 float y_data[BUFFER_SIZE * N_ROLLING_HISTORY];
 class FFT fft(BUFFER_SIZE *N_ROLLING_HISTORY, N_MEL_BIN, MIN_FREQUENCY, MAX_FREQUENCY, SAMPLE_RATE,
 	      MIN_VOLUME_THRESHOLD);
-class VisualEffect effect(N_MEL_BIN, led_strip_len);
+class VisualEffect *effect;
 
 I2SClass i2s;
 Ble *ble;
@@ -43,6 +43,8 @@ Ble *ble;
 void setup()
 {
 	init_settings();
+
+	effect = new VisualEffect(N_MEL_BIN, led_strip_len);
 
 	pinMode(LR_PIN, OUTPUT);
 	digitalWrite(LR_PIN, LOW);
@@ -91,8 +93,8 @@ void loop()
 	}
 
 	fft.t2mel(y_data, mel_data);
-	effect.set_mode(CurrentMode);
-	effect.visualize(mel_data);
+	effect->set_mode(CurrentMode);
+	effect->visualize(mel_data);
 	FastLED.show();
 
 	static uint32_t oldtime = 0;
@@ -100,7 +102,7 @@ void loop()
 	if ((button_state == 0) && (millis() - oldtime > 1000)) {
 		oldtime = millis();
 		CurrentMode = (CurrentMode + 1) % VisualEffect::mode_count();
-		effect.set_mode(CurrentMode);
+		effect->set_mode(CurrentMode);
 	} else if (button_state != 0)
 		oldtime = 0;
 
