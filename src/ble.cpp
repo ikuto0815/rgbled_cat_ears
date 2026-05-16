@@ -123,8 +123,38 @@ Ble::Ble(void)
 
 	pService->start();
 
+	/* system settings service (LED parameters, maybe more) */
+
+	BLEService *pSystemService = pServer->createService(SYSTEM_CONFIG_SERVICE_UUID);
+
+	BLECharacteristic *pCharacteristicSystemServiceName = pSystemService->createCharacteristic(
+		CHARACTERISTIC_CONFIG_SERVICE_NAME_UUID,
+		BLECharacteristic::PROPERTY_READ);
+	BLEDescriptor *systemServiceNameDescriptor = new BLEDescriptor(CUSTOM_DESCRIPTOR_UUID, 200);
+	systemServiceNameDescriptor->setValue(R"({"type":"serviceName", "order":1})");
+	pCharacteristicSystemServiceName->addDescriptor(systemServiceNameDescriptor);
+	pCharacteristicSystemServiceName->setValue("system settings");
+
+	createVariableCharacteristic(pSystemService, (void*)&led_strip_len, sizeof(uint16_t), CHARACTERISTIC_LED_STRIP_LEN_UUID,
+				     R"({"type":"uint16", "order":1, "disabled":false, "label":"LED strip length"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&led_offset_left, sizeof(uint16_t), CHARACTERISTIC_LED_OFFSET_LEFT_UUID,
+				     R"({"type":"uint16", "order":1, "disabled":false, "label":"LED left ear offset"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&led_ear_len, sizeof(uint16_t), CHARACTERISTIC_LED_EAR_LEN_UUID,
+				     R"({"type":"uint16", "order":1, "disabled":false, "label":"LED ear length"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&led_middle_gap, sizeof(uint16_t), CHARACTERISTIC_LED_MIDDLE_GAP_UUID,
+				     R"({"type":"uint16", "order":1, "disabled":false, "label":"LED middle gap"})");
+
+	createVariableCharacteristic(pSystemService, (void*)&save_dummy, sizeof(uint8_t), CHARACTERISTIC_SYSTEM_SAVE_UUID,
+				     R"({"type":"button", "order":4, "disabled":false, "label":"Save"})");
+
+	pSystemService->start();
+
 	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
 	pAdvertising->addServiceUUID(CONFIG_SERVICE_UUID);
+	pAdvertising->addServiceUUID(SYSTEM_CONFIG_SERVICE_UUID);
 	pAdvertising->start();
 }
 

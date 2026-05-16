@@ -19,6 +19,11 @@ void init_settings(void)
 	max_brightness = preferences.getUChar("max_brightness", max_brightness);
 	color = preferences.getUInt("color", color);
 	CurrentMode = preferences.getUChar("mode", CurrentMode);
+
+	led_strip_len = preferences.getUShort("led_strip_len", led_strip_len);
+	led_offset_left = preferences.getUShort("led_offset_left", led_offset_left);
+	led_ear_len = preferences.getUShort("led_ear_len", led_ear_len);
+	led_middle_gap = preferences.getUShort("led_middle_gap", led_middle_gap);
 }
 
 void save_settings(void)
@@ -27,4 +32,9 @@ void save_settings(void)
 	preferences.putUChar("max_brightness", max_brightness);
 	preferences.putUInt("color", color);
 	preferences.putUChar("mode", CurrentMode);
+
+	preferences.putUShort("led_strip_len", led_strip_len);
+	preferences.putUShort("led_offset_left", led_offset_left);
+	preferences.putUShort("led_ear_len", led_ear_len);
+	preferences.putUShort("led_middle_gap", led_middle_gap);
 }
