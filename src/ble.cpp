@@ -9,7 +9,7 @@
 #include <string>
 
 class ServerCallbacks : public BLEServerCallbacks {
-	public: 
+	public:
 		bool deviceConnected = false;
 
 		void onConnect(BLEServer *pServer)
@@ -102,11 +102,11 @@ Ble::Ble(void)
 	pCharacteristicServiceName->setValue("effect settings");
 
 	createVariableCharacteristic(pService, (void*)&max_brightness, sizeof(uint8_t), CHARACTERISTIC_BRIGHTNESS_UUID,
-				     R"({"type":"uint8slider", "order":1, "disabled":false, "label":"max brightness", "minInt":0, "maxInt":255, "stepInt":1})"); 
+				     R"({"type":"uint8slider", "order":1, "disabled":false, "label":"max brightness", "minInt":0, "maxInt":255, "stepInt":1})");
 
 	createVariableCharacteristic(pService, (void*)&color, sizeof(uint32_t), CHARACTERISTIC_COLOR_UUID,
 				     R"({"type":"color", "order":2, "disabled":false, "label":"Color", "alphaSlider":true})");
-				     
+
 	String mode_descriptor_value = String(R"({"type":"dropdown", "order":3, "disabled":false, label:"Mode", "options":[)");
 	for (int i = 0; i < VisualEffect::mode_count(); i++)
 		mode_descriptor_value += String("\"") + modes[i].name + String("\",");
